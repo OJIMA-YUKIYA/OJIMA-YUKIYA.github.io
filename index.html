@@ -128,6 +128,7 @@
             let change_scene_flag = false;
 
             let first_time = true;
+            let soraSendDataChannelLoop_flag  = false;
 
 			//Create scene and create XR experience.
 			const createScene = async function (remoteVideo) {
@@ -186,8 +187,8 @@
                 button.width = "1000px";
                 button.height = "200px";
                 button.color = "white";
-                button.fontSize = 120;
                 button.cornerRadius = 100;
+                button.fontSize = 120;
                 button.background = "green";
                 panel.addControl(button);
 
@@ -211,11 +212,13 @@
 				}
                 else {
 					// XR support is available; proceed.
-                    // setInterval(soraSendDataChannelLoop, 1000.0/20.0);
-                    // soraSendDataChannelLoop();
                     // console.log("hello");
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
-                        console.log("hello");
+                        if (!soraSendDataChannelLoop_flag) {
+                            soraSendDataChannelLoop_flag = true;
+                            setInterval(soraSendDataChannelLoop, 1000.0/20.0);
+                            soraSendDataChannelLoop();
+                        }
                         controller.onMotionControllerInitObservable.add((motionController) => {
                             if (motionController.handness === 'right') {
                                 const xr_ids = motionController.getComponentIds();
@@ -291,20 +294,19 @@
 			});
 
             function connect_clicked() {
-                recvonly.connect();
+                if (!recvonly.signalingSwitched) {
+                    recvonly.connect();
+                }
                 // setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                 // soraSendDataChannelLoop();
             }
 
 
             function soraSendDataChannelLoop() {
-                recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
-            }
-
-            function connect_clicked() {
-                recvonly.connect();
-                setInterval(soraSendDataChannelLoop, 1000.0/20.0);
-                soraSendDataChannelLoop();
+                if (recvonly.signalingSwitched) {
+                    console.log("sendMessage");
+                    recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                }
             }
 
 

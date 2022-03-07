@@ -180,6 +180,23 @@
                 var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
                 var panel = new BABYLON.GUI.StackPanel();
                 advancedTexture.addControl(panel);
+
+                var title = new BABYLON.GUI.TextBlock();
+                if (document.getElementsByName('change_header')[0].checked) {
+                    title.text = "Controlling Segway";
+                    // header = 0x43;
+                }
+                else {
+                    title.text = "Controlling Unitree\nA1";
+                    // header = 0xa1;
+                }
+                title.height = "300px";
+                title.width = "1600px"
+                title.color = "white";
+                title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+                title.fontSize = "120"
+                panel.addControl(title);
+
                 var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change scene");
                 button.onPointerClickObservable.add(() => {
                     change_scene_flag = true;
@@ -335,6 +352,21 @@
                 else {
                     header = 0xa1;
                 }
+                engine.stopRenderLoop();
+                if (document.getElementsByName('change_scene')[0].checked) {
+                    scene = createScene(document.getElementById('remoteVideo1'));
+                }
+                else {
+                    scene = createScene(document.getElementById('remoteVideo2'));
+                }
+                scene.then(function (returnedScene) {
+                    sceneToRender = returnedScene;
+                });
+                engine.runRenderLoop(function () {
+    				if (sceneToRender) {
+    					sceneToRender.render();
+    				}
+    			});
             }
 
             setInterval(observe_change_scene_flag, 1000);

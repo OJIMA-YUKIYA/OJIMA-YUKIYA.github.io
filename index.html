@@ -215,6 +215,7 @@
                     // soraSendDataChannelLoop();
                     // console.log("hello");
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
+                        console.log("hello");
                         controller.onMotionControllerInitObservable.add((motionController) => {
                             if (motionController.handness === 'right') {
                                 const xr_ids = motionController.getComponentIds();

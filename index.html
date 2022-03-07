@@ -271,13 +271,18 @@
                         });
                     });
 
-                    // xrHelper.baseExperience.onStateChangedObservable.add((state) => {
-                    //     if(state === BABYLON.WebXRState.IN_XR){
-                    //         // console.log('WebXR camera position(before_enteringVR): ' + xrHelper.baseExperience.camera.position);
-                    //         xrHelper.baseExperience.camera.position.set(0, 0, 0);
-                    //         // console.log('WebXR camera position(after_enteringVR): ' + xrHelper.baseExperience.camera.position);
-                    //     }
-                    // });
+                    xrHelper.baseExperience.onStateChangedObservable.add((state) => {
+                        if(state === BABYLON.WebXRState.IN_XR){
+                            // console.log('WebXR camera position(before_enteringVR): ' + xrHelper.baseExperience.camera.position);
+                            // xrHelper.baseExperience.camera.position.set(0, 0, 0);
+                            // console.log('WebXR camera position(after_enteringVR): ' + xrHelper.baseExperience.camera.position);
+                        }
+                        else {
+                            lin = 0;
+                            ang = 0;
+                            side = 0;
+                        }
+                    });
 
                     // xrHelper.baseExperience.onStateChangedObservable.add((state) => {
                     //     if(state === BABYLON.WebXRState.IN_XR){

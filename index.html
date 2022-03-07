@@ -129,6 +129,7 @@
 
             let first_time = true;
             let soraSendDataChannelLoop_flag  = false;
+            let intervalID = null;
 
 			//Create scene and create XR experience.
 			const createScene = async function (remoteVideo) {
@@ -231,9 +232,8 @@
 					// XR support is available; proceed.
                     // console.log("hello");
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
-                        if (!soraSendDataChannelLoop_flag) {
-                            soraSendDataChannelLoop_flag = true;
-                            setInterval(soraSendDataChannelLoop, 1000.0/20.0);
+                        if (intervalID == null) {
+                            intervalID = setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                             soraSendDataChannelLoop();
                         }
                         controller.onMotionControllerInitObservable.add((motionController) => {
@@ -277,10 +277,13 @@
                             // xrHelper.baseExperience.camera.position.set(0, 0, 0);
                             // console.log('WebXR camera position(after_enteringVR): ' + xrHelper.baseExperience.camera.position);
                         }
-                        else {
+                        else if (state === BABYLON.WebXRState.NOT_IN_XR) {
                             lin = 0;
                             ang = 0;
                             side = 0;
+                            recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                            clearInterval(intervalID);
+                            intervalID = null;
                         }
                     });
 
@@ -326,7 +329,6 @@
 
             function soraSendDataChannelLoop() {
                 if (recvonly.signalingSwitched) {
-                    console.log("sendMessage");
                     recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
                 }
             }

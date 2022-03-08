@@ -18,8 +18,8 @@
     <body>
         <button onclick="connect_clicked()" style="width: 100px; height: 50px; margin: 10px"><font size="5">接続</font></button>
         <!-- <button onclick="disconnect_clicked()">切断</button> -->
-        <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">映像1</font>　　
-        <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">映像2</font><br>
+        <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">映像1</font>　　 -->
+        <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">映像2</font><br> -->
         <div id="remote-videos">
 
 		<!-- <video id="remoteVideo" autoplay style="display: none;"></video> -->
@@ -28,6 +28,8 @@
 
         </div>
 
+        <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">映像1</font>　　
+        <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">映像2</font>
 		<!-- Babylon.js のレンダリング内容を表示するための Canvas タグ-->
 		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left"></canvas>
 

@@ -20,9 +20,6 @@
         <!-- <button onclick="disconnect_clicked()">切断</button> -->
         <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">scene1</font>　　
         <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">scene2</font><br>
-        <input type="radio" name="change_header" onclick="change_header_clicked()" checked style="width: 100px; height: 50px;"><font size="7">segway</font><br>
-        <input type="radio" name="change_header" onclick="change_header_clicked()" style="width: 100px; height: 50px;"><font size="7">Unitree A1</font>
-
         <div id="remote-videos">
 
 		<!-- <video id="remoteVideo" autoplay style="display: none;"></video> -->
@@ -175,41 +172,41 @@
                     scene
                 );
 
-                var plane = BABYLON.Mesh.CreatePlane("plane", 1);
-                plane.position = new BABYLON.Vector3(0, 0.5, 2);
-                // plane.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP
-
-                var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
-                var panel = new BABYLON.GUI.StackPanel();
-                advancedTexture.addControl(panel);
-
-                var title = new BABYLON.GUI.TextBlock();
-                if (document.getElementsByName('change_header')[0].checked) {
-                    title.text = "Controlling Segway";
-                    // header = 0x43;
-                }
-                else {
-                    title.text = "Controlling Unitree\nA1";
-                    // header = 0xa1;
-                }
-                title.height = "300px";
-                title.width = "1600px"
-                title.color = "white";
-                title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-                title.fontSize = "120"
-                panel.addControl(title);
-
-                var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change scene");
-                button.onPointerClickObservable.add(() => {
-                    change_scene_flag = true;
-                });
-                button.width = "1000px";
-                button.height = "200px";
-                button.color = "white";
-                button.cornerRadius = 100;
-                button.fontSize = 120;
-                button.background = "green";
-                panel.addControl(button);
+                // var plane = BABYLON.Mesh.CreatePlane("plane", 1);
+                // plane.position = new BABYLON.Vector3(0, 0.5, 2);
+                // // plane.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP
+                //
+                // var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+                // var panel = new BABYLON.GUI.StackPanel();
+                // advancedTexture.addControl(panel);
+                //
+                // var title = new BABYLON.GUI.TextBlock();
+                // if (document.getElementsByName('change_header')[0].checked) {
+                //     title.text = "Controlling Segway";
+                //     // header = 0x43;
+                // }
+                // else {
+                //     title.text = "Controlling Unitree\nA1";
+                //     // header = 0xa1;
+                // }
+                // title.height = "300px";
+                // title.width = "1600px"
+                // title.color = "white";
+                // title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+                // title.fontSize = "120"
+                // panel.addControl(title);
+                //
+                // var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change scene");
+                // button.onPointerClickObservable.add(() => {
+                //     change_scene_flag = true;
+                // });
+                // button.width = "1000px";
+                // button.height = "200px";
+                // button.color = "white";
+                // button.cornerRadius = 100;
+                // button.fontSize = 120;
+                // button.background = "green";
+                // panel.addControl(button);
 
                 // Create a default environment for the scene.
 				var environment = scene.createDefaultEnvironment();
@@ -341,30 +338,6 @@
 
 
             function change_scene_clicked() {
-                engine.stopRenderLoop();
-                if (document.getElementsByName('change_scene')[0].checked) {
-                    scene = createScene(document.getElementById('remoteVideo1'));
-                }
-                else {
-                    scene = createScene(document.getElementById('remoteVideo2'));
-                }
-                scene.then(function (returnedScene) {
-                    sceneToRender = returnedScene;
-                });
-                engine.runRenderLoop(function () {
-    				if (sceneToRender) {
-    					sceneToRender.render();
-    				}
-    			});
-            }
-
-            function change_header_clicked() {
-                if (document.getElementsByName('change_header')[0].checked) {
-                    header = 0x43;
-                }
-                else {
-                    header = 0xa1;
-                }
                 engine.stopRenderLoop();
                 if (document.getElementsByName('change_scene')[0].checked) {
                     scene = createScene(document.getElementById('remoteVideo1'));

@@ -129,8 +129,8 @@
             let change_scene_flag = false;
 
             let first_time = true;
-            // let soraSendDataChannelLoop_flag  = false;
-            // let intervalID = null;
+            let soraSendDataChannelLoop_flag  = false;
+            let intervalID = null;
 
 			//Create scene and create XR experience.
 			const createScene = async function (remoteVideo) {
@@ -233,10 +233,10 @@
 					// XR support is available; proceed.
                     // console.log("hello");
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
-                        // if (intervalID == null) {
-                        //     intervalID = setInterval(soraSendDataChannelLoop, 1000.0/20.0);
-                        //     soraSendDataChannelLoop();
-                        // }
+                        if (intervalID == null) {
+                            intervalID = setInterval(soraSendDataChannelLoop, 1000.0/20.0);
+                            soraSendDataChannelLoop();
+                        }
                         controller.onMotionControllerInitObservable.add((motionController) => {
                             if (motionController.handness === 'right') {
                                 const xr_ids = motionController.getComponentIds();
@@ -333,11 +333,11 @@
             }
 
 
-            // function soraSendDataChannelLoop() {
-            //     if (recvonly.signalingSwitched) {
-            //         recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
-            //     }
-            // }
+            function soraSendDataChannelLoop() {
+                if (recvonly.signalingSwitched) {
+                    recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                }
+            }
 
 
             function change_scene_clicked() {

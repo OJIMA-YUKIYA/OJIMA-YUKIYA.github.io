@@ -35,8 +35,8 @@
 		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left"></canvas>
 
         <script type="text/javascript" src="./sora.js"></script>
-
         <script type="text/javascript">
+            var segway_info = '';
             const debug = true;
             const sora = Sora.connection("wss://sora.ikeilabsora.0am.jp/signaling", debug);
             const channelId = "twincam-left";
@@ -104,6 +104,15 @@
             function disconnect_clicked() {
                 recvonly.disconnect();
             }
+
+            recvonly.on('message', (event) => {
+                if (event.data.byteLength == 8) {
+                    let vel_time = (new Int32Array([new Uint8Array(event.data)[0] << 24])[0] + new Int32Array([new Uint8Array(event.data)[1] << 16])[0] + new Int32Array([new Uint8Array(event.data)[2] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[3]])[0] )/1000.0 ;
+                    let real_vel = (new Int32Array([new Uint8Array(event.data)[4] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[5] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[6] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[7]])[0] )/10000.0 ;
+
+                    segway_info = real_vel.toFixed(3) + '(m/s)';
+                 }
+            });
 
 
 
@@ -177,6 +186,8 @@
                     scene
                 );
 
+                console.log(videoDome);
+
                 var plane = BABYLON.Mesh.CreatePlane("plane", 1);
                 plane.position = new BABYLON.Vector3(0, 0.5, 2);
                 // plane.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP
@@ -195,15 +206,35 @@
                     // header = 0xa1;
                 }
                 title.height = "300px";
-                title.width = "1600px"
+                title.width = "1000px"
                 title.color = "white";
                 title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-                title.fontSize = "120"
+                title.fontSize = "100"
                 panel.addControl(title);
 
-                var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change scene");
+                var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change video");
                 button.onPointerClickObservable.add(() => {
-                    change_scene_flag = true;
+                    videoDome.dispose();
+                    if (document.getElementsByName('change_scene')[0].checked) {
+                        videoDome = new BABYLON.VideoDome(
+                            'VideoDome',
+                            document.getElementById('remoteVideo2'),
+                            { autoPlay: true },
+                            scene
+                        );
+                        document.getElementsByName('change_scene')[0].checked = false;
+                        document.getElementsByName('change_scene')[1].checked = true;
+                    }
+                    else {
+                        videoDome = new BABYLON.VideoDome(
+                            'VideoDome',
+                            document.getElementById('remoteVideo1'),
+                            { autoPlay: true },
+                            scene
+                        );
+                        document.getElementsByName('change_scene')[0].checked = true;
+                        document.getElementsByName('change_scene')[1].checked = false;
+                    }
                 });
                 button.width = "1000px";
                 button.height = "200px";
@@ -212,6 +243,10 @@
                 button.fontSize = 120;
                 button.background = "green";
                 panel.addControl(button);
+
+                scene.registerBeforeRender(function () {
+                    title.text = segway_info;
+                });
 
                 // Create a default environment for the scene.
 				var environment = scene.createDefaultEnvironment();
@@ -384,14 +419,6 @@
     			});
             }
 
-            setInterval(observe_change_scene_flag, 1000);
-            function observe_change_scene_flag() {
-                if (change_scene_flag) {
-                    change_scene_flag = false;
-                    change_scene();
-                }
-            }
-
             function change_scene() {
                 engine.stopRenderLoop();
                 if (document.getElementsByName('change_scene')[0].checked) {
@@ -421,7 +448,7 @@
                 console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
                 e.gamepad.index, e.gamepad.id,
                 e.gamepad.buttons.length, e.gamepad.axes.length);
-                setInterval(gameLoop, 1000.0/20.0);
+                setInterval(gameLoop, 1000.0/10.0);
                 gameLoop();
             });
 
@@ -432,7 +459,7 @@
                 if (gp != null) {
                     // let side = -gp.axes[2];
                     let side = gp.buttons[6].value - gp.buttons[7].value;
-                    console.log(gp.buttons);
+                    // console.log(gp.buttons);
                     let ang = -gp.axes[0];
                     let lin = -gp.axes[3];
                     // document.getElementById('leftright').value = 127*ang;

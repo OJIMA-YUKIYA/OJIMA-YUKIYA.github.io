@@ -31,6 +31,23 @@
 
         </div>
 
+        <main style="margin: 0; padding: 0;">
+            <div class="VelocityStatus" style="float: left; width: 50%; background-color: #ddd;">
+                セグウェイに送信した情報<br>
+                <font size="4">
+                    <pre><div id="sgvs"></div></pre>
+                </font>
+                <br>
+            </div>
+            <div class="SegwayStatusStamped" style="float: right; width: 50%; background-color: #eee;">
+                セグウェイから受信した情報 <br>
+                <font size="4">
+                    <pre><div id="sgss"></div></pre>
+                </font>
+                <br>
+            </div>
+        </main>
+
 		<!-- Babylon.js のレンダリング内容を表示するための Canvas タグ-->
 		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left"></canvas>
 
@@ -111,6 +128,7 @@
                     let real_vel = (new Int32Array([new Uint8Array(event.data)[4] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[5] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[6] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[7]])[0] )/10000.0 ;
 
                     segway_info = real_vel.toFixed(3) + '(m/s)';
+                    document.getElementById("sgss").innerHTML = '時刻(s) ' + vel_time + '\n走行速度(m/s) ' + real_vel;
                  }
             });
 

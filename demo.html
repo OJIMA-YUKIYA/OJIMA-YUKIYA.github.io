@@ -26,8 +26,9 @@
         <div id="remote-videos">
 
 		<!-- <video id="remoteVideo" autoplay style="display: none;"></video> -->
-        <video id="remoteVideo1" autoplay controls style="border: 3px solid gray; width: 48.5%; float: left;"></video>
-        <video id="remoteVideo2" autoplay controls style="border: 3px solid gray; width: 48.5%; float: left;"></video>
+        <!-- <video id="remoteVideo1" autoplay controls style="border: 3px solid gray; width: 48.5%; float: left;"></video> -->
+        <video id="remoteVideo1" autoplay controls style="border: 1px solid gray; width: 49%; float: left;"></video>
+        <video id="remoteVideo2" autoplay controls style="border: 1px solid gray; width: 49%; float: left;"></video>
 
         </div>
 
@@ -153,16 +154,20 @@
             const engine = createDefaultEngine(canvas);
 
             let header = 0x43, lin = 0, ang = 0, side = 0;
-            let change_scene_flag = false;
 
             let first_time = true;
             let soraSendDataChannelLoop_flag  = false;
             let intervalID = null;
 
+            let dome_position_x = 0;
+            let dome_position_y = 0;
+            let dome_position_z = 0;
+
 			//Create scene and create XR experience.
 			const createScene = async function (remoteVideo) {
 				//新しいシーンオブジェクトを作成する
                 var scene = new BABYLON.Scene(engine);
+                // scene.detachControl();
 
 				//つねに原点を中心として回転するカメラを作成する
 				// var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 4, 3.8, new BABYLON.Vector3(0, 1, 0), scene);
@@ -177,7 +182,7 @@
 
                 // Camera の操作を canvas 上で可能にする
     			camera.attachControl(canvas, true);
-                console.log(camera.inputs);
+                // console.log(camera.inputs);
                 camera.inputs.attached.gamepad.detachControl();
 
                 // scene.activeCamera.beta += 0.8;
@@ -200,11 +205,17 @@
                 var videoDome = new BABYLON.VideoDome(
                     'VideoDome',
                     remoteVideo,
-                    { autoPlay: true },
+                    {
+                        resolution: 64,
+                        // clickToPlay: true,
+                        autoPlay: true,
+                        size: 5000
+                    },
                     scene
                 );
 
-                console.log(videoDome);
+                videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
 
                 var plane = BABYLON.Mesh.CreatePlane("plane", 1);
                 plane.position = new BABYLON.Vector3(0, 0.5, 2);
@@ -232,24 +243,35 @@
 
                 var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change video");
                 button.onPointerClickObservable.add(() => {
-                    videoDome.dispose();
                     if (document.getElementsByName('change_scene')[0].checked) {
+                        videoDome.dispose();
                         videoDome = new BABYLON.VideoDome(
                             'VideoDome',
                             document.getElementById('remoteVideo2'),
-                            { autoPlay: true },
+                            {
+                                autoPlay: true,
+                                resolution: 64,
+                                // clickToPlay: true,
+                            },
                             scene
                         );
+                        videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                         document.getElementsByName('change_scene')[0].checked = false;
                         document.getElementsByName('change_scene')[1].checked = true;
                     }
                     else {
+                        videoDome.dispose();
                         videoDome = new BABYLON.VideoDome(
                             'VideoDome',
                             document.getElementById('remoteVideo1'),
-                            { autoPlay: true },
+                            {
+                                autoPlay: true,
+                                resolution: 64,
+                                // clickToPlay: true,
+                            },
                             scene
                         );
+                        videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                         document.getElementsByName('change_scene')[0].checked = true;
                         document.getElementsByName('change_scene')[1].checked = false;
                     }
@@ -274,8 +296,13 @@
 
                 // Initialize XR experience with default experience helper.
 				xrHelper = await scene.createDefaultXRExperienceAsync({
-                    // floorMeshes: [environment.ground]
+                    floorMeshes: [environment.ground]
                 });
+
+                // xrHelper.teleportation.rotationEnabled = false;
+                xrHelper.teleportation.rotationAngle = 0;
+
+                console.log(xrHelper.input.xrCamera.inputs);
 
                 //===Stick=====================================================================================================
                 //==============================================================================================================
@@ -286,20 +313,41 @@
 				}
                 else {
 					// XR support is available; proceed.
-                    // console.log("hello");
+
+                    // xrHelper.input.xrCamera.inputs.attached.mouse.detachControl();
+                    // xrHelper.input.xrCamera.cameraRotation = new BABYLON.Vector2(0, 0);
+
+                    xrHelper.input.xrCamera.setTarget(new BABYLON.Vector3(0, 0, 1));
+                    // xrHelper.input.xrCamera.inputs.detachElement(true);
+
+                    // xrHelper.input.xrCamera.inputs.remove(xrHelper.input.xrCamera.inputs.attached.mouse);
+
+                    // xrHelper.input.xrCamera.inputs.attached.mouse.touchEnabled = false;
+                    // xrHelper.input.xrCamera.inputs.attached.mouse._allowCameraRotation = false;
+
+                    // xrHelper.input.onControllerRemovedObservable.add(() => {
+                    //
+                    // });
+
+                    // xrHelper.input.xrCamera.inputs.clear();
+
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
+                        xrHelper.teleportation.rotationEnabled = false;
                         if (intervalID == null) {
                             intervalID = setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                             soraSendDataChannelLoop();
                         }
                         controller.onMotionControllerInitObservable.add((motionController) => {
                             if (motionController.handness === 'right') {
+                                xrHelper.input.xrCamera.detachControl();
                                 const xr_ids = motionController.getComponentIds();
                                 let thumbstickComponent = motionController.getComponent(xr_ids[2]);
                                 thumbstickComponent.onAxisValueChangedObservable.add((axes) => {
                                     // console.log(ang);
                                     // ang = -axes.x;
                                     lin = -axes.y;
+                                    dome_position_z = 2000*axes.y;
+                                    videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                                 });
                                 let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
                                 triggerComponent.onButtonStateChangedObservable.add((event) => {
@@ -332,31 +380,22 @@
                         });
                     });
 
-                    xrHelper.baseExperience.onStateChangedObservable.add((state) => {
-                        if(state === BABYLON.WebXRState.IN_XR){
-                            // console.log('WebXR camera position(before_enteringVR): ' + xrHelper.baseExperience.camera.position);
-                            // xrHelper.baseExperience.camera.position.set(0, 0, 0);
-                            // console.log('WebXR camera position(after_enteringVR): ' + xrHelper.baseExperience.camera.position);
-                        }
-                        else if (state === BABYLON.WebXRState.NOT_IN_XR) {
-                            lin = 0;
-                            ang = 0;
-                            side = 0;
-                            recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
-                            clearInterval(intervalID);
-                            intervalID = null;
-                        }
-                    });
-
                     // xrHelper.baseExperience.onStateChangedObservable.add((state) => {
                     //     if(state === BABYLON.WebXRState.IN_XR){
-                    //         xrHelper.baseExperience.onInitialXRPoseSetObservable.add((xrCamera) => {
-                    //             console.log(xrCamera);
-                    //             xrCamera.x = 100;
-                    //             console.log(xrCamera);
-                    //         });
+                    //         // console.log('WebXR camera position(before_enteringVR): ' + xrHelper.baseExperience.camera.position);
+                    //         // xrHelper.baseExperience.camera.position.set(0, 0, 0);
+                    //         // console.log('WebXR camera position(after_enteringVR): ' + xrHelper.baseExperience.camera.position);
+                    //     }
+                    //     else if (state === BABYLON.WebXRState.NOT_IN_XR) {
+                    //         lin = 0;
+                    //         ang = 0;
+                    //         side = 0;
+                    //         recvonly.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                    //         clearInterval(intervalID);
+                    //         intervalID = null;
                     //     }
                     // });
+
 				}
 
                 return scene;

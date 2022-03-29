@@ -175,7 +175,7 @@
                 const camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, 0), scene)
 				// const camera = new BABYLON.FreeCamera('MainCamera', new BABYLON.Vector3(0, 0, -2), scene);
 				// カメラの向きを座標0地点にする
-				// camera.setTarget(new BABYLON.Vector3(0, 1, 0));
+				camera.setTarget(new BABYLON.Vector3(0, 0, 1));
 				// カメラの視野角を 95 度に設定
 				// const cameraFovRadian = 100 * (Math.PI / 180);
 				// camera.fov = cameraFovRadian;
@@ -346,7 +346,7 @@
                                     // console.log(ang);
                                     // ang = -axes.x;
                                     lin = -axes.y;
-                                    // dome_position_z = 2000*axes.y;
+                                    dome_position_z = 2000*axes.y;
                                     videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                                 });
                                 let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger

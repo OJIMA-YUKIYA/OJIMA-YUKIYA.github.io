@@ -374,18 +374,18 @@
 
                     // xrHelper.input.xrCamera.inputs.clear();
 
-                    //
-                    // scene.onBeforeCameraRenderObservable.add((xr_camera) => {
-                    //     console.log('hello');
-                    //     if (xr_camera.isLeftCamera) {
-                    //         videoDome.texture = videoTexture_left;
-                    //     }
-                    //     else {
-                    //         videoDome.texture = videoTexture_right;
-                    //     }
-                    //     // videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
-                    //     // videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
-                    // });
+
+                    scene.onBeforeCameraRenderObservable.add((xr_camera) => {
+                        console.log('hello');
+                        if (xr_camera.isLeftCamera) {
+                            videoDome.texture = videoTexture_left;
+                        }
+                        else {
+                            videoDome.texture = videoTexture_right;
+                        }
+                        // videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
+                        // videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
+                    });
 
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
                         xrHelper.teleportation.rotationEnabled = false;
@@ -512,23 +512,23 @@
             }
 
 
-            function change_scene_clicked() {
-                engine.stopRenderLoop();
-                if (document.getElementsByName('change_scene')[0].checked) {
-                    scene = createScene(document.getElementById('remoteVideo_left'));
-                }
-                else {
-                    scene = createScene(document.getElementById('remoteVideo_right'));
-                }
-                scene.then(function (returnedScene) {
-                    sceneToRender = returnedScene;
-                });
-                engine.runRenderLoop(function () {
-    				if (sceneToRender) {
-    					sceneToRender.render();
-    				}
-    			});
-            }
+            // function change_scene_clicked() {
+            //     engine.stopRenderLoop();
+            //     if (document.getElementsByName('change_scene')[0].checked) {
+            //         scene = createScene(document.getElementById('remoteVideo_left'));
+            //     }
+            //     else {
+            //         scene = createScene(document.getElementById('remoteVideo_right'));
+            //     }
+            //     scene.then(function (returnedScene) {
+            //         sceneToRender = returnedScene;
+            //     });
+            //     engine.runRenderLoop(function () {
+    		// 		if (sceneToRender) {
+    		// 			sceneToRender.render();
+    		// 		}
+    		// 	});
+            // }
 
             // function change_header_clicked() {
             //     if (document.getElementsByName('change_header')[0].checked) {

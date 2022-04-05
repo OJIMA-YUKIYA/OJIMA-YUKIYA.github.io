@@ -376,15 +376,14 @@
 
 
                     scene.onBeforeCameraRenderObservable.add((xr_camera) => {
-                        console.log('hello');
                         if (xr_camera.isLeftCamera) {
                             videoDome.texture = videoTexture_left;
                         }
                         else {
                             videoDome.texture = videoTexture_right;
                         }
-                        // videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
-                        // videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
+                        videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
+                        videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
                     });
 
                     xrHelper.input.onControllerAddedObservable.add((controller) => {

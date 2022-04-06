@@ -60,13 +60,18 @@
             var segway_info = '';
             const debug = true;
             const sora = Sora.connection("wss://sora.ikeilabsora.0am.jp/signaling", debug);
-            const channelId = "twincam-left";
             // const sora = Sora.connection("wss://207-148-92-89.stable.sora.sora-labo.shiguredo.app/signaling", debug);
             // const channelId = "OJIMA-YUKIYA@sora-devtools";
             // const metadata = {
             //     "signaling_key":"0mKFzDghLJNL7bmqa99hj4pp13IGaG_o4SHWdHoIKMzffpyZwQmo5dOIVi_9QBZ_"
             // };
             const options_left = {
+                multistream : true,
+                video : true,
+                audio : false
+            };
+
+            const options_right = {
                 multistream : true,
                 video : true,
                 audio : true,
@@ -79,14 +84,8 @@
                 ]
             };
 
-            const options_right = {
-                multistream : true,
-                video : true,
-                audio : true
-            };
-
             const recvonly_left = sora.recvonly("twincam-left", null, options_left);
-            const recvonly_right = sora.recvonly("twincam-right", null, options_right);
+            const sendrecv_right = sora.sendrecv("twincam-right", null, options_right);
 
             let mediaStream_id_left = null;
             let mediaStream_id_right = null;
@@ -107,7 +106,7 @@
 
             });
 
-            recvonly_right.on("track", (event) => {
+            sendrecv_right.on("track", (event) => {
                 console.log(event);
                 const stream = event.streams[0];
                 // if (mediaStream_id_right == null) {
@@ -130,7 +129,7 @@
                 }
             });
 
-            recvonly_left.on("removetrack", (event) => {
+            sendrecv_right.on("removetrack", (event) => {
                 if (event.target.id == mediaStream_id_right) {
                     document.querySelector(`#remoteVideo_right`).srcObject = null;
                     mediaStream_id_right = null;
@@ -140,10 +139,10 @@
 
 
             // function disconnect_clicked() {
-            //     recvonly_left.disconnect();
+            //     sendrecv_right.disconnect();
             // }
 
-            recvonly_left.on('message', (event) => {
+            sendrecv_right.on('message', (event) => {
                 if (event.data.byteLength == 8) {
                     let vel_time = (new Int32Array([new Uint8Array(event.data)[0] << 24])[0] + new Int32Array([new Uint8Array(event.data)[1] << 16])[0] + new Int32Array([new Uint8Array(event.data)[2] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[3]])[0] )/1000.0 ;
                     let real_vel = (new Int32Array([new Uint8Array(event.data)[4] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[5] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[6] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[7]])[0] )/10000.0 ;
@@ -154,6 +153,16 @@
             });
 
 
+
+            // navigator.mediaDevices
+            // .getUserMedia({ audio: true, video: false })
+            // .then((stream) => sendrecv_right.connect(stream))
+            // .then((stream) => {
+            //     recvonly_left.connect();
+            // })
+            // .catch((e) => {
+            //      console.error(e);
+            // });
 
 
             /////////////////////////////////////////////////////////////////////////
@@ -175,8 +184,6 @@
 
             let header = 0x43, lin = 0, ang = 0, side = 0;
 
-            let first_time = true;
-            let soraSendDataChannelLoop_flag  = false;
             let intervalID = null;
 
             let dome_position_x = 0;
@@ -440,9 +447,9 @@
                                 if (xr_camera.isLeftCamera) {
                                     videoDome.texture = videoTexture_left;
                                     epos_send_count++;
-                                    if (epos_send_count == 10 && recvonly_left.signalingSwitched) {
+                                    if (epos_send_count == 10 && sendrecv_right.signalingSwitched) {
                                         console.log(xrHelper.baseExperience.camera.rotationQuaternion.y);
-                                        recvonly_left.sendMessage('#sora-devtools', new Uint8Array([0xe0, 127*xrHelper.baseExperience.camera.rotationQuaternion.y]));
+                                        sendrecv_right.sendMessage('#sora-devtools', new Uint8Array([0xe0, 127*xrHelper.baseExperience.camera.rotationQuaternion.y]));
                                         epos_send_count = 0;
                                     }
                                 }
@@ -460,7 +467,7 @@
                             lin = 0;
                             ang = 0;
                             side = 0;
-                            recvonly_left.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                            sendrecv_right.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
                             clearInterval(intervalID);
                             intervalID = null;
                         }
@@ -493,20 +500,24 @@
 			});
 
             function connect_clicked() {
-                if (!recvonly_left.signalingSwitched) {
-                    recvonly_left.connect();
-                }
-                if (!recvonly_right.signalingSwitched) {
-                    recvonly_right.connect();
-                }
+                navigator.mediaDevices
+                .getUserMedia({ audio: true, video: false })
+                .then((stream) => {
+                    console.log(stream);
+                    sendrecv_right.connect(stream)
+                })
+                .catch((e) => {
+                     console.error(e);
+                });
+                recvonly_left.connect();
                 // setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                 // soraSendDataChannelLoop();
             }
 
 
             function soraSendDataChannelLoop() {
-                if (recvonly_left.signalingSwitched) {
-                    recvonly_left.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                if (sendrecv_right.signalingSwitched) {
+                    sendrecv_right.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
                 }
             }
 
@@ -603,7 +614,7 @@
                     // document.getElementById('side').value = 127*side;
                     // document.getElementById('side_out').innerHTML = (127*side).toFixed(0);
 
-                    if (recvonly_left.signalingSwitched) {
+                    if (sendrecv_right.signalingSwitched) {
                         // dataChannel.send(new TextEncoder().encode("jyja" + ang.toFixed(3) + "," + lin.toFixed(3) + "\n"));
                         // const buffer = new ArrayBuffer(1);
                         // console.log(buffer);
@@ -617,12 +628,12 @@
                         }
                         if (gp.buttons[1].value) {
                             start = true;
-                            recvonly_left.sendMessage("#sora-devtools", new Int32Array([0x11111111]));
+                            sendrecv_right.sendMessage("#sora-devtools", new Int32Array([0x11111111]));
                             return;
                         }
                         if (gp.buttons[0].value) {
                             start = false;
-                            recvonly_left.sendMessage("#sora-devtools", new Int32Array([0x99999999]));
+                            sendrecv_right.sendMessage("#sora-devtools", new Int32Array([0x99999999]));
                             return;
                         }
                         if (start) {
@@ -638,7 +649,7 @@
                             // ang = (ang << 8) & 0x0000ff00;
                             // lin = lin & 0x000000ff;
                             let send_value = new Uint8Array([header, side, ang, lin]);
-                            recvonly_left.sendMessage("#sora-devtools", send_value);
+                            sendrecv_right.sendMessage("#sora-devtools", send_value);
                             return;
                         }
                     }

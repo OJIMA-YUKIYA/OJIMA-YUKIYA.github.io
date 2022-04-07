@@ -1871,6 +1871,12 @@
 	        prefix = prefix + "[" + clientId + "]";
 	    }
 	    if (console.info !== undefined && console.group !== undefined) {
+            if (title == 'CLOSE DATA CHANNEL') {
+                CLOSE_DATA_CHANNEL = true;
+            }
+            if (title == 'OPEN DATA CHANNEL') {
+                CLOSE_DATA_CHANNEL = false;
+            }
 	        console.group(prefix + " " + title);
 	        dump(value);
 	        console.groupEnd();

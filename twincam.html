@@ -54,7 +54,9 @@
 
 		<!-- Babylon.js のレンダリング内容を表示するための Canvas タグ-->
 		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left"></canvas>
-
+        <script type="text/javascript">
+            let CLOSE_DATA_CHANNEL = false;
+        </script>
         <script type="text/javascript" src="./sora.js"></script>
         <script type="text/javascript">
             var segway_info = '';
@@ -90,13 +92,17 @@
             let mediaStream_id_left = null;
             let mediaStream_id_right = null;
 
+            let new_video_left = false;
+            let new_video_right = false;
+
             recvonly_left.on("track", (event) => {
                 console.log(event);
                 const stream = event.streams[0];
                 // if (mediaStream_id_left == null) {
                     document.querySelector('#remoteVideo_left').srcObject = stream;
-                    // document.querySelector('#remoteVideo_left').autoplay = true;
+                    document.querySelector('#remoteVideo_left').autoplay = true;
                     mediaStream_id_left = event.streams[0].id;
+                    new_video_left = true;
                     // return;
                 // }
 
@@ -111,8 +117,9 @@
                 const stream = event.streams[0];
                 // if (mediaStream_id_right == null) {
                     document.querySelector('#remoteVideo_right').srcObject = stream;
-                    // document.querySelector('#remoteVideo_right').autoplay = true;
+                    document.querySelector('#remoteVideo_right').autoplay = true;
                     mediaStream_id_right = event.streams[0].id;
+                    new_video_right = true;
                     // return;
                 // }
 
@@ -190,14 +197,9 @@
             let dome_position_y = 0;
             let dome_position_z = 0;
 
-            let remoteVideo_left = document.getElementById('remoteVideo_left');
-            let remoteVideo_right = document.getElementById('remoteVideo_right');
-
-            let videoTexture_left;
-            let videoTexture_right;
-            let videoTexture;
-
-            var remoteVideo = remoteVideo_left;
+            let dome_direction_x = 0;
+            let dome_direction_y = 0;
+            let dome_direction_z = 0;
 
 
             let epos_send_count = 0;
@@ -260,7 +262,7 @@
 
                 // videoDome.fovMultiplier = 1;
                 videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
-                videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
+                videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
 
 
                 var plane = BABYLON.Mesh.CreatePlane("plane", 1);
@@ -384,13 +386,21 @@
 
                     scene.onBeforeCameraRenderObservable.add((xr_camera) => {
                         if (xr_camera.isLeftCamera) {
+                            if (new_video_left) {
+                                videoTexture_left = new BABYLON.VideoTexture("left", document.getElementById('remoteVideo_left'), scene, true, true);
+                                new_video_left = false;
+                            }
                             videoDome.texture = videoTexture_left;
                         }
                         else {
+                            if (new_video_right) {
+                                videoTexture_right = new BABYLON.VideoTexture("right", document.getElementById('remoteVideo_right'), scene, true, true);
+                                new_video_right = false;
+                            }
                             videoDome.texture = videoTexture_right;
                         }
-                        videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
-                        videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
+                        videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                        videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
                     });
 
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
@@ -407,8 +417,9 @@
                                     // console.log(ang);
                                     // ang = -axes.x;
                                     lin = -axes.y;
-                                    // dome_position_z = 5000*axes.y;
-                                    videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                                    dome_position_z = 2000*axes.y;
+                                    // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                                    // videoDome.setDirection(new BABYLON.Vector3(Math.cos(axes.x*Math.PI), 0, Math.sin(axes.x*Math.PI)));
                                 });
                                 let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
                                 triggerComponent.onButtonStateChangedObservable.add((event) => {
@@ -431,6 +442,8 @@
                                 let thumbstickComponent = motionController.getComponent(xr_ids[2]);
                                 thumbstickComponent.onAxisValueChangedObservable.add((axes) => {
                                     ang = -axes.x;
+                                    dome_direction_x = Math.cos(axes.x*Math.PI/2.0);
+                                    dome_direction_z = Math.sin(axes.x*Math.PI/2.0)
                                     // lin = -axes.y;
                                 });
                                 let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
@@ -447,7 +460,7 @@
                                 if (xr_camera.isLeftCamera) {
                                     videoDome.texture = videoTexture_left;
                                     epos_send_count++;
-                                    if (epos_send_count == 10 && sendrecv_right.signalingSwitched) {
+                                    if (epos_send_count > 10 && sendrecv_right.signalingSwitched) {
                                         console.log(xrHelper.baseExperience.camera.rotationQuaternion.y);
                                         sendrecv_right.sendMessage('#sora-devtools', new Uint8Array([0xe0, 127*xrHelper.baseExperience.camera.rotationQuaternion.y]));
                                         epos_send_count = 0;
@@ -480,7 +493,7 @@
             }
 
 			// Create scene.
-			let scene = createScene();
+			scene = createScene();
 			scene.then(function (returnedScene) {
 				sceneToRender = returnedScene;
 			});
@@ -518,6 +531,16 @@
             function soraSendDataChannelLoop() {
                 if (sendrecv_right.signalingSwitched) {
                     sendrecv_right.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
+                }
+            }
+
+            setInterval(observe_CLOSE_DATA_CHANNEL, 10000);
+            function observe_CLOSE_DATA_CHANNEL() {
+                if (CLOSE_DATA_CHANNEL) {
+                    connect_clicked();
+                }
+                if (CLOSE_DATA_CHANNEL && sendrecv_right.signalingSwitched) {
+                    CLOSE_DATA_CHANNEL = false;
                 }
             }
 
@@ -649,6 +672,7 @@
                             // ang = (ang << 8) & 0x0000ff00;
                             // lin = lin & 0x000000ff;
                             let send_value = new Uint8Array([header, side, ang, lin]);
+                            console.log(ang)
                             sendrecv_right.sendMessage("#sora-devtools", send_value);
                             return;
                         }

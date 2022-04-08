@@ -249,7 +249,7 @@
 
                 var videoDome = new BABYLON.VideoDome(
                     'VideoDome',
-                    document.getElementById('remoteVideo_left'),
+                    document.getElementById('remoteVideo_right'),
                     {
                         resolution: 64,
                         // clickToPlay: true,
@@ -385,22 +385,22 @@
 
 
                     scene.onBeforeCameraRenderObservable.add((xr_camera) => {
-                        if (xr_camera.isLeftCamera) {
-                            if (new_video_left) {
-                                videoTexture_left = new BABYLON.VideoTexture("left", document.getElementById('remoteVideo_left'), scene, true, true);
-                                new_video_left = false;
-                            }
-                            videoDome.texture = videoTexture_left;
-                        }
-                        else {
-                            if (new_video_right) {
-                                videoTexture_right = new BABYLON.VideoTexture("right", document.getElementById('remoteVideo_right'), scene, true, true);
-                                new_video_right = false;
-                            }
-                            videoDome.texture = videoTexture_right;
-                        }
-                        videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
-                        videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
+                        // if (xr_camera.isLeftCamera) {
+                        //     if (new_video_left) {
+                        //         videoTexture_left = new BABYLON.VideoTexture("left", document.getElementById('remoteVideo_left'), scene, true, true);
+                        //         new_video_left = false;
+                        //     }
+                        //     videoDome.texture = videoTexture_left;
+                        // }
+                        // else {
+                        //     if (new_video_right) {
+                        //         videoTexture_right = new BABYLON.VideoTexture("right", document.getElementById('remoteVideo_right'), scene, true, true);
+                        //         new_video_right = false;
+                        //     }
+                        //     videoDome.texture = videoTexture_right;
+                        // }
+                        // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                        // videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
                     });
 
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
@@ -417,7 +417,7 @@
                                     // console.log(ang);
                                     // ang = -axes.x;
                                     lin = -axes.y;
-                                    dome_position_z = 2000*axes.y;
+                                    // dome_position_z = 2000*axes.y;
                                     // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                                     // videoDome.setDirection(new BABYLON.Vector3(Math.cos(axes.x*Math.PI), 0, Math.sin(axes.x*Math.PI)));
                                 });
@@ -442,8 +442,8 @@
                                 let thumbstickComponent = motionController.getComponent(xr_ids[2]);
                                 thumbstickComponent.onAxisValueChangedObservable.add((axes) => {
                                     ang = -axes.x;
-                                    dome_direction_x = Math.cos(axes.x*Math.PI/2.0);
-                                    dome_direction_z = Math.sin(axes.x*Math.PI/2.0)
+                                    // dome_direction_x = Math.cos(axes.x*Math.PI/2.0);
+                                    // dome_direction_z = Math.sin(axes.x*Math.PI/2.0)
                                     // lin = -axes.y;
                                 });
                                 let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
@@ -467,7 +467,7 @@
                                     }
                                 }
                                 else {
-                                    videoDome.texture = videoTexture_right;
+                                    // videoDome.texture = videoTexture_right;
                                 }
                                 // videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
                                 // videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));

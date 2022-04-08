@@ -483,6 +483,7 @@
                             sendrecv_right.sendMessage("#sora-devtools", new Uint8Array([ header, 127*side, 127*ang, 127*lin ]));
                             clearInterval(intervalID);
                             intervalID = null;
+                            camera.inputs.attached.gamepad.detachControl();
                         }
                         console.log(state);
                     });

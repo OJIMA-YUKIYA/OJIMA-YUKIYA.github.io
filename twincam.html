@@ -19,7 +19,8 @@
     </head>
 
     <body>
-        <button onclick="connect_clicked()" style="width: 100px; height: 50px; margin: 10px"><font size="5">接続</font></button>
+        <button onclick="connect_clicked();" style="width: 200px; height: 50px; margin: 10px"><font size="5">Sora Connect</font></button>
+        <input id="mic_on_off_button" type="button" onclick="mic_on_off();" value="mic on" style="width: 100px; height: 50px; margin: 10px; font-size: 20px">
         <!-- <button onclick="disconnect_clicked()">切断</button> -->
         <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">scene1</font>　　 -->
         <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">scene2</font><br> -->
@@ -75,15 +76,15 @@
 
             const options_right = {
                 multistream : true,
-                video : true,
+                video : false,
                 audio : true,
-                dataChannelSignaling : true,
-                dataChannels : [
-                    {
-                        label : "#sora-devtools",
-                        direction : "sendrecv"
-                    }
-                ]
+                // dataChannelSignaling : true,
+                // dataChannels : [
+                //     {
+                //         label : "#sora-devtools",
+                //         direction : "sendrecv"
+                //     }
+                // ]
             };
 
             const recvonly_left = sora.recvonly("twincam-left", null, options_left);
@@ -115,13 +116,13 @@
             sendrecv_right.on("track", (event) => {
                 console.log(event);
                 const stream = event.streams[0];
-                // if (mediaStream_id_right == null) {
+                if (event.track.kind == "video") {
                     document.querySelector('#remoteVideo_right').srcObject = stream;
                     document.querySelector('#remoteVideo_right').autoplay = true;
                     mediaStream_id_right = event.streams[0].id;
                     new_video_right = true;
-                    // return;
-                // }
+                    return;
+                }
 
                 // if (event.streams[0].id == mediaStream_id_right) {
                     // return;
@@ -513,10 +514,13 @@
 				engine.resize();
 			});
 
+            let localStream;
+
             function connect_clicked() {
                 navigator.mediaDevices
                 .getUserMedia({ audio: true, video: false })
                 .then((stream) => {
+                    localStream = stream;
                     console.log(stream);
                     sendrecv_right.connect(stream)
                 })
@@ -526,6 +530,17 @@
                 recvonly_left.connect();
                 // setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                 // soraSendDataChannelLoop();
+            }
+
+            function mic_on_off() {
+                if (document.getElementById('mic_on_off_button').value == 'mic off') {
+                    document.getElementById('mic_on_off_button').value = 'mic on';
+                    localStream.getAudioTracks()[0].enabled = true;
+                }
+                else {
+                    document.getElementById('mic_on_off_button').value = 'mic off';
+                    localStream.getAudioTracks()[0].enabled = false;
+                }
             }
 
 

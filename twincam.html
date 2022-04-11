@@ -15,7 +15,7 @@
 
         <!-- <script src="./Babylon.js/dist/gui/babylon.gui.min.js"></script> -->
         <!-- <script src="./Babylon.js/dist/gui/babylon.gui.js.map"></script> -->
-        <title>ヤェム研 3月9日ラボツアー Segway A1</title>
+        <title>4月20日 demo</title>
     </head>
 
     <body>
@@ -547,19 +547,21 @@
             let localStream;
 
             function connect_clicked() {
-                navigator.mediaDevices
-                .getUserMedia({ audio: true, video: false })
-                .then((stream) => {
-                    localStream = stream;
-                    console.log(stream);
-                    sendrecv_right.connect(stream)
-                    // document.getElementById('remoteVideo_left').srcObject = stream;
-                    // document.getElementById('remoteVideo_left').muted = true;
-                })
-                .catch((e) => {
-                     console.error(e);
-                });
-                recvonly_left.connect();
+                if (!sendrecv_right.signalingSwitched) {
+                    navigator.mediaDevices
+                    .getUserMedia({ audio: true, video: false })
+                    .then((stream) => {
+                        localStream = stream;
+                        console.log(stream);
+                        sendrecv_right.connect(stream)
+                        // document.getElementById('remoteVideo_left').srcObject = stream;
+                        // document.getElementById('remoteVideo_left').muted = true;
+                    })
+                    .catch((e) => {
+                         console.error(e);
+                    });
+                    recvonly_left.connect();
+                }
                 // setInterval(soraSendDataChannelLoop, 1000.0/20.0);
                 // soraSendDataChannelLoop();
             }

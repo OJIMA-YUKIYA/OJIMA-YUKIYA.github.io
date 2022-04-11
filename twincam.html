@@ -271,30 +271,46 @@
 
 
                 var plane = BABYLON.Mesh.CreatePlane("plane", 1);
-                plane.position = new BABYLON.Vector3(0, 0.5, 2);
+                    console.log(plane);
+                    plane.position = new BABYLON.Vector3(0, 0.5, 2);
+                    const planeMat = new BABYLON.StandardMaterial("planeMat", scene);
+                        planeMat.alpha = 1;
+                        planeMat.ambientColor = new BABYLON.Color3(0, 1, 0);
+                        plane.material = planeMat;
                 // plane.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP
 
                 // var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
                 var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
-                var panel = new BABYLON.GUI.StackPanel();
-                advancedTexture.addControl(panel);
+                    console.log(advancedTexture);
+                    var panel = new BABYLON.GUI.StackPanel();
+                    advancedTexture.addControl(panel);
+
+                var rect = new BABYLON.GUI.Rectangle('rect');
+                    rect.background = 'green';
+                    rect.alpha = 0.5;
+                    rect.height = '300px';
+                    rect.width = '1000px';
+                    advancedTexture.addControl(rect);
+                    // panel.addControl(rect);
+                    console.log(rect);
 
                 var title = new BABYLON.GUI.TextBlock();
-                title.text = "Controlling Segway";
-                // if (document.getElementsByName('change_header')[0].checked) {
-                //     title.text = "Controlling Segway";
-                //     // header = 0x43;
-                // }
-                // else {
-                //     title.text = "Controlling Unitree\nA1";
-                //     // header = 0xa1;
-                // }
-                title.height = "300px";
-                title.width = "1000px"
-                title.color = "white";
-                title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-                title.fontSize = "100"
-                panel.addControl(title);
+                    title.text = "Controlling Segway";
+                    // if (document.getElementsByName('change_header')[0].checked) {
+                    //     title.text = "Controlling Segway";
+                    //     // header = 0x43;
+                    // }
+                    // else {
+                    //     title.text = "Controlling Unitree\nA1";
+                    //     // header = 0xa1;
+                    // }
+                    title.height = "300px";
+                    title.width = "1000px"
+                    title.color = "white";
+                    title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+                    title.fontSize = "100";
+                    // panel.addControl(title);
+                    advancedTexture.addControl(title);
 
                 // var button = BABYLON.GUI.Button.CreateSimpleButton("but", "Change video");
                 // button.onPointerClickObservable.add(() => {

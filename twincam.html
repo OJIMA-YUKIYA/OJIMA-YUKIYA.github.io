@@ -420,11 +420,20 @@
                                     // console.log(ang);
                                     // ang = -axes.x;
                                     lin = -axes.y;
-                                    box.position = new BABYLON.Vector3((5 + 0.5*lin)*Math.sin(-Math.PI*ang/3.0), -5, (5 + 0.5*lin)*Math.cos(-Math.PI*ang/3.0));
-                                    box.scaling = new BABYLON.Vector3(1.0, 1.0, lin);
-                                    box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/3.0, 0);
-                                    triangle.position = new BABYLON.Vector3((5.5 + lin)*Math.sin(-Math.PI*ang/3.0), -5, (5.5 + lin)*Math.cos(-Math.PI*ang/3.0));
-                                    triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/3.0, 0);
+                                    if (lin >= 0) {
+                                        box.position = new BABYLON.Vector3((5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                                        box.scaling = new BABYLON.Vector3(1.0, 1.0, lin);
+                                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
+                                        triangle.position = new BABYLON.Vector3((5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
+                                        triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/4.0, 0);
+                                    }
+                                    else {
+                                        box.position = new BABYLON.Vector3((-5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                                        box.scaling = new BABYLON.Vector3(1.0, 1.0, -lin);
+                                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
+                                        triangle.position = new BABYLON.Vector3((-5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
+                                        triangle.rotation = new BABYLON.Vector3(0, Math.PI/2 -Math.PI*ang/4.0, 0);
+                                    }
                                     // dome_position_z = 2000*axes.y;
                                     // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
                                     // videoDome.setDirection(new BABYLON.Vector3(Math.cos(axes.x*Math.PI), 0, Math.sin(axes.x*Math.PI)));
@@ -450,11 +459,20 @@
                                 let thumbstickComponent = motionController.getComponent(xr_ids[2]);
                                 thumbstickComponent.onAxisValueChangedObservable.add((axes) => {
                                     ang = -axes.x;
-                                    box.position = new BABYLON.Vector3((5 + 0.5*lin)*Math.sin(-Math.PI*ang/3.0), -5, (5 + 0.5*lin)*Math.cos(-Math.PI*ang/3.0));
-                                    box.scaling = new BABYLON.Vector3(1.0, 1.0, lin);
-                                    box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/3.0, 0);
-                                    triangle.position = new BABYLON.Vector3((5.5 + lin)*Math.sin(-Math.PI*ang/3.0), -5, (5.5 + lin)*Math.cos(-Math.PI*ang/3.0));
-                                    triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/3.0, 0);
+                                    if (lin >= 0) {
+                                        box.position = new BABYLON.Vector3((5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                                        box.scaling = new BABYLON.Vector3(1.0, 1.0, lin);
+                                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
+                                        triangle.position = new BABYLON.Vector3((5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
+                                        triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/4.0, 0);
+                                    }
+                                    else {
+                                        box.position = new BABYLON.Vector3((-5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                                        box.scaling = new BABYLON.Vector3(1.0, 1.0, -lin);
+                                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
+                                        triangle.position = new BABYLON.Vector3((-5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
+                                        triangle.rotation = new BABYLON.Vector3(0, Math.PI/2 -Math.PI*ang/4.0, 0);
+                                    }
                                     // dome_direction_x = Math.cos(axes.x*Math.PI/2.0);
                                     // dome_direction_z = Math.sin(axes.x*Math.PI/2.0)
                                     // lin = -axes.y;

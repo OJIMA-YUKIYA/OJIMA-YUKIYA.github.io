@@ -19,7 +19,7 @@
     </head>
 
     <body>
-        <button onclick="connect_clicked();" style="width: 200px; height: 50px; margin: 10px"><font size="5">Sora Connect</font></button>
+        <button onclick="connect_clicked();" style="width: 150px; height: 50px; margin: 10px"><font size="5">Connect</font></button>
         <input id="mic_on_off_button" type="button" onclick="mic_on_off();" value="mic on" style="width: 100px; height: 50px; margin: 10px; font-size: 20px">
         <!-- <button onclick="disconnect_clicked()">切断</button> -->
         <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">scene1</font>　　 -->
@@ -29,10 +29,8 @@
 
         <div id="remote-videos">
 
-		<!-- <video id="remoteVideo" autoplay style="display: none;"></video> -->
-        <!-- <video id="remoteVideo_left" autoplay controls style="border: 3px solid gray; width: 48.5%; float: left;"></video> -->
-        <video id="remoteVideo_left" controls style="border: 1px solid gray; width: 49%; float: left;"></video>
-        <video id="remoteVideo_right" controls style="border: 1px solid gray; width: 49%; float: left;"></video>
+            <video id="remoteVideo_left" controls style="border: 1px solid gray; width: 49.5%; float: left;"></video>
+            <video id="remoteVideo_right" controls style="border: 1px solid gray; width: 49.5%; float: left;"></video>
 
         </div>
 
@@ -54,7 +52,7 @@
         </main>
 
 		<!-- Babylon.js のレンダリング内容を表示するための Canvas タグ-->
-		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left"></canvas>
+		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left; touch-action: none;"></canvas>
         <script type="text/javascript">
             let CLOSE_DATA_CHANNEL = false;
         </script>
@@ -76,15 +74,15 @@
 
             const options_right = {
                 multistream : true,
-                video : false,
+                video : true,
                 audio : true,
-                // dataChannelSignaling : true,
-                // dataChannels : [
-                //     {
-                //         label : "#sora-devtools",
-                //         direction : "sendrecv"
-                //     }
-                // ]
+                dataChannelSignaling : true,
+                dataChannels : [
+                    {
+                        label : "#sora-devtools",
+                        direction : "sendrecv"
+                    }
+                ]
             };
 
             const recvonly_left = sora.recvonly("twincam-left", null, options_left);
@@ -93,41 +91,43 @@
             let mediaStream_id_left = null;
             let mediaStream_id_right = null;
 
-            let new_video_left = false;
-            let new_video_right = false;
-
             recvonly_left.on("track", (event) => {
                 console.log(event);
                 const stream = event.streams[0];
-                // if (mediaStream_id_left == null) {
-                    document.querySelector('#remoteVideo_left').srcObject = stream;
-                    document.querySelector('#remoteVideo_left').autoplay = true;
-                    mediaStream_id_left = event.streams[0].id;
-                    new_video_left = true;
-                    // return;
-                // }
-
-                // if (event.streams[0].id == mediaStream_id_left) {
-                    // return;
-                // }
-
+                document.querySelector('#remoteVideo_left').srcObject = stream;
+                document.querySelector('#remoteVideo_left').autoplay = true;
+                mediaStream_id_left = event.streams[0].id;
             });
 
             sendrecv_right.on("track", (event) => {
                 console.log(event);
-                const stream = event.streams[0];
                 if (event.track.kind == "video") {
-                    document.querySelector('#remoteVideo_right').srcObject = stream;
+                    document.querySelector('#remoteVideo_right').srcObject = event.streams[0];
                     document.querySelector('#remoteVideo_right').autoplay = true;
+                    document.querySelector('#remoteVideo_right').muted = false;
                     mediaStream_id_right = event.streams[0].id;
-                    new_video_right = true;
                     return;
                 }
 
-                // if (event.streams[0].id == mediaStream_id_right) {
-                    // return;
-                // }
+                if (event.track.kind == 'audio') {
+                    const audio = document.createElement('audio');
+                    audio.id = "audio-" + event.streams[0].id;
+                    audio.srcObject = event.streams[0];
+                    audio.controls = true;
+                    audio.autoplay = true;
+                    document.getElementById('remote-videos').appendChild(audio);
+                }
+
             });
+
+            setInterval(observe_video, 10000);
+            function observe_video() {
+                if (document.getElementById(`audio-${mediaStream_id_right}`)) {
+                    document.getElementById(`audio-${mediaStream_id_right}`).remove();
+                }
+            }
+
+
 
 
             recvonly_left.on("removetrack", (event) => {
@@ -142,35 +142,23 @@
                     document.querySelector(`#remoteVideo_right`).srcObject = null;
                     mediaStream_id_right = null;
                 }
+                if (document.getElementById(`audio-${event.target.id}`)) {
+                    document.getElementById(`audio-${event.target.id}`).remove();
+                }
             });
 
 
-
-            // function disconnect_clicked() {
-            //     sendrecv_right.disconnect();
-            // }
-
             sendrecv_right.on('message', (event) => {
-                if (event.data.byteLength == 8) {
+                if (event.data.byteLength == 12) {
                     let vel_time = (new Int32Array([new Uint8Array(event.data)[0] << 24])[0] + new Int32Array([new Uint8Array(event.data)[1] << 16])[0] + new Int32Array([new Uint8Array(event.data)[2] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[3]])[0] )/1000.0 ;
-                    let real_vel = (new Int32Array([new Uint8Array(event.data)[4] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[5] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[6] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[7]])[0] )/10000.0 ;
+                    let lin_vel = (new Int32Array([new Uint8Array(event.data)[4] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[5] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[6] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[7]])[0] )/10000.0 ;
+                    let ang_vel = (new Int32Array([new Uint8Array(event.data)[8] << 24])[0] + new Int32Array([ new Uint8Array(event.data)[9] << 16 ])[0] + new Int32Array([new Uint8Array(event.data)[10] << 8])[0] + new Int32Array([ new Uint8Array(event.data)[11]])[0] )/10000.0 ;
 
-                    segway_info = real_vel.toFixed(3) + '(m/s)';
-                    document.getElementById("sgss").innerHTML = '時刻(s) ' + vel_time + '\n走行速度(m/s) ' + real_vel;
+                    segway_info = lin_vel.toFixed(3) + '(m/s)\n' + ang_vel.toFixed(3) + '(deg/s)';
+                    document.getElementById("sgss").innerHTML = '時刻(s) ' + vel_time + '\n並進速度(m/s) ' + lin_vel + '\n旋回速度(deg/s)' + ang_vel;
                  }
             });
 
-
-
-            // navigator.mediaDevices
-            // .getUserMedia({ audio: true, video: false })
-            // .then((stream) => sendrecv_right.connect(stream))
-            // .then((stream) => {
-            //     recvonly_left.connect();
-            // })
-            // .catch((e) => {
-            //      console.error(e);
-            // });
 
 
             /////////////////////////////////////////////////////////////////////////
@@ -209,6 +197,7 @@
 			const createScene = async function() {
 				//新しいシーンオブジェクトを作成する
                 var scene = new BABYLON.Scene(engine);
+                scene.ambientColor = new BABYLON.Color3(1, 1, 1);
                 // scene.detachControl();
 
 				//つねに原点を中心として回転するカメラを作成する
@@ -230,10 +219,10 @@
                 // scene.activeCamera.beta += 0.8;
 
 				// Create a light and aim it vertically to the sky (0, 1, 0).
-				//let light = new BABYLON.HemisphericLight('light-1', new BABYLON.Vector3(0, 1, 0), scene);
+				// let light = new BABYLON.HemisphericLight('light-1', new BABYLON.Vector3(0, 1, 0), scene);
 
 				// Set light intensity to a lower value (default is 1).
-				//light.intensity = 0.5;
+				// light.intensity = 0.5;
 
 				// Add one of Babylon's built-in sphere shapes.
 				//let sphere = BABYLON.MeshBuilder.CreateSphere('sphere-1', {
@@ -244,9 +233,24 @@
 				// Position the sphere up by half of its height.
 				//sphere.position.y = 1;
 
+                // const box = BABYLON.MeshBuilder.CreateBox("box", {width: 1, height: 0.5, depth: 1}, scene);
+                //     box.position = new BABYLON.Vector3(0, -5, 5);
+                //     const boxMat = new BABYLON.StandardMaterial("boxMat", scene);
+                //         boxMat.alpha = 1;
+                //         boxMat.ambientColor = new BABYLON.Color3(0, 1, 0);
+                //     box.material = boxMat;
+                //
+                // const triangle = BABYLON.MeshBuilder.CreateCylinder("triangle", {diameter: 2.0, height: 0.5, tessellation: 3}, scene);
+                //     console.log(triangle);
+                //     triangle.position = new BABYLON.Vector3(0, -5, 6);
+                //     triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2.0, 0)
+                //     const triMat = new BABYLON.StandardMaterial("triMat", scene);
+                //         triMat.alpha = 1;
+                //         triMat.ambientColor = new BABYLON.Color3(0, 1, 0);
+                //     triangle.material = triMat;
+
                 videoTexture_left = new BABYLON.VideoTexture("left", document.getElementById('remoteVideo_left'), scene, true, true);
                 videoTexture_right = new BABYLON.VideoTexture("right", document.getElementById('remoteVideo_right'), scene, true, true);
-
 
                 var videoDome = new BABYLON.VideoDome(
                     'VideoDome',
@@ -351,7 +355,7 @@
 
                 // Initialize XR experience with default experience helper.
 				xrHelper = await scene.createDefaultXRExperienceAsync({
-                    floorMeshes: [environment.ground]
+                    // floorMeshes: [environment.ground]
                 });
 
                 //===Stick=====================================================================================================
@@ -384,25 +388,6 @@
 
                     // xrHelper.input.xrCamera.inputs.clear();
 
-
-                    // scene.onBeforeCameraRenderObservable.add((xr_camera) => {
-                        // if (xr_camera.isLeftCamera) {
-                        //     if (new_video_left) {
-                        //         videoTexture_left = new BABYLON.VideoTexture("left", document.getElementById('remoteVideo_left'), scene, true, true);
-                        //         new_video_left = false;
-                        //     }
-                        //     videoDome.texture = videoTexture_left;
-                        // }
-                        // else {
-                        //     if (new_video_right) {
-                        //         videoTexture_right = new BABYLON.VideoTexture("right", document.getElementById('remoteVideo_right'), scene, true, true);
-                        //         new_video_right = false;
-                        //     }
-                        //     videoDome.texture = videoTexture_right;
-                        // }
-                        // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
-                        // videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
-                    // });
 
                     xrHelper.input.onControllerAddedObservable.add((controller) => {
                         xrHelper.teleportation.rotationEnabled = false;
@@ -470,8 +455,8 @@
                                 else {
                                     // videoDome.texture = videoTexture_right;
                                 }
-                                // videoDome.setAbsolutePosition(new BABYLON.Vector3(0, 0, 0));
-                                // videoDome.setDirection(new BABYLON.Vector3(0, 0, 0));
+                                // videoDome.setAbsolutePosition(new BABYLON.Vector3(dome_position_x, dome_position_y, dome_position_z));
+                                // videoDome.setDirection(new BABYLON.Vector3(dome_direction_x, dome_direction_y, dome_direction_z));
                             });
                             // console.log('WebXR camera position(before_enteringVR): ' + xrHelper.baseExperience.camera.position);
                             // xrHelper.baseExperience.camera.position.set(0, 0, 0);
@@ -523,6 +508,8 @@
                     localStream = stream;
                     console.log(stream);
                     sendrecv_right.connect(stream)
+                    // document.getElementById('remoteVideo_left').srcObject = stream;
+                    // document.getElementById('remoteVideo_left').muted = true;
                 })
                 .catch((e) => {
                      console.error(e);
@@ -534,12 +521,12 @@
 
             function mic_on_off() {
                 if (document.getElementById('mic_on_off_button').value == 'mic off') {
-                    document.getElementById('mic_on_off_button').value = 'mic on';
                     localStream.getAudioTracks()[0].enabled = true;
+                    document.getElementById('mic_on_off_button').value = 'mic on';
                 }
                 else {
-                    document.getElementById('mic_on_off_button').value = 'mic off';
                     localStream.getAudioTracks()[0].enabled = false;
+                    document.getElementById('mic_on_off_button').value = 'mic off';
                 }
             }
 

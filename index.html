@@ -20,7 +20,9 @@
 
     <body>
         <button onclick="connect_clicked();" style="width: 150px; height: 50px; margin: 10px"><font size="5">Connect</font></button>
-        <input id="mic_on_off_button" type="button" onclick="mic_on_off();" value="mic on" style="width: 100px; height: 50px; margin: 10px; font-size: 20px">
+        <!-- <input id="mic_on_off_button" type="button" onclick="mic_on_off();" value="mic on" style="width: 100px; height: 50px; margin: 10px; font-size: 20px"> -->
+        <input type="radio" name="mic_on_off" onclick="mic_on_off_clicked()" style="width: 100px; height: 50px;"><font size="7">mic on</font>
+        <input type="radio" name="mic_on_off" onclick="mic_on_off_clicked()" checked style="width: 100px; height: 50px;"><font size="7">mic off</font><br>
         <!-- <button onclick="disconnect_clicked()">切断</button> -->
         <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" checked style="width: 100px; height: 50px;"><font size="7">scene1</font>　　 -->
         <!-- <input type="radio" name="change_scene" onclick="change_scene_clicked()" style="width: 100px; height: 50px;"><font size="7">scene2</font><br> -->
@@ -221,7 +223,7 @@
 				// Position the sphere up by half of its height.
 				//sphere.position.y = 1;
 
-                const box = BABYLON.MeshBuilder.CreateBox("box", {width: 1, height: 0.5, depth: 1}, scene);
+                const box = BABYLON.MeshBuilder.CreateBox("box", {width: 1, height: 0.5, depth: 2}, scene);
                     box.position = new BABYLON.Vector3(0, -5, 5);
                     box.scaling = new BABYLON.Vector3(1.0, 1.0, 0);
                     const boxMat = new BABYLON.StandardMaterial("boxMat", scene);
@@ -351,18 +353,18 @@
                 scene.registerBeforeRender(function () {
                     title.text = segway_info;
                     if (lin >= 0) {
-                        box.position = new BABYLON.Vector3((5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                        box.position = new BABYLON.Vector3((5 + lin)*Math.sin(-Math.PI*ang/6.0), -5, (5 + lin)*Math.cos(-Math.PI*ang/6.0));
                         box.scaling = new BABYLON.Vector3(1.0, 1.0, lin);
-                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
-                        triangle.position = new BABYLON.Vector3((5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
-                        triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/4.0, 0);
+                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/6.0, 0);
+                        triangle.position = new BABYLON.Vector3((5.5 + 2*lin)*Math.sin(-Math.PI*ang/6.0), -5, (5.5 + 2*lin)*Math.cos(-Math.PI*ang/6.0));
+                        triangle.rotation = new BABYLON.Vector3(0, -Math.PI/2 -Math.PI*ang/6.0, 0);
                     }
                     else {
-                        box.position = new BABYLON.Vector3((-5 + 0.5*lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5 + 0.5*lin)*Math.cos(-Math.PI*ang/4.0));
+                        box.position = new BABYLON.Vector3((-5 + lin)*Math.sin(-Math.PI*ang/6.0), -5, (-5 + lin)*Math.cos(-Math.PI*ang/6.0));
                         box.scaling = new BABYLON.Vector3(1.0, 1.0, -lin);
-                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/4.0, 0);
-                        triangle.position = new BABYLON.Vector3((-5.5 + lin)*Math.sin(-Math.PI*ang/4.0), -5, (-5.5 + lin)*Math.cos(-Math.PI*ang/4.0));
-                        triangle.rotation = new BABYLON.Vector3(0, Math.PI/2 -Math.PI*ang/4.0, 0);
+                        box.rotation = new BABYLON.Vector3(0, -Math.PI*ang/6.0, 0);
+                        triangle.position = new BABYLON.Vector3((-5.5 + 2*lin)*Math.sin(-Math.PI*ang/6.0), -5, (-5.5 + 2*lin)*Math.cos(-Math.PI*ang/6.0));
+                        triangle.rotation = new BABYLON.Vector3(0, Math.PI/2 -Math.PI*ang/6.0, 0);
                     }
                 });
 
@@ -554,7 +556,8 @@
                     .then((stream) => {
                         localStream = stream;
                         console.log(stream);
-                        sendrecv_right.connect(stream)
+                        sendrecv_right.connect(stream);
+                        localStream.getAudioTracks()[0].enabled = false;
                         // document.getElementById('remoteVideo_left').srcObject = stream;
                         // document.getElementById('remoteVideo_left').muted = true;
                     })
@@ -567,14 +570,12 @@
                 // soraSendDataChannelLoop();
             }
 
-            function mic_on_off() {
-                if (document.getElementById('mic_on_off_button').value == 'mic off') {
+            function mic_on_off_clicked() {
+                if (document.getElementsByName('mic_on_off')[0].checked) {
                     localStream.getAudioTracks()[0].enabled = true;
-                    document.getElementById('mic_on_off_button').value = 'mic on';
                 }
                 else {
                     localStream.getAudioTracks()[0].enabled = false;
-                    document.getElementById('mic_on_off_button').value = 'mic off';
                 }
             }
 

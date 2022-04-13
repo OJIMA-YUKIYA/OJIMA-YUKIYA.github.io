@@ -19,12 +19,12 @@
     </head>
 
     <body>
-        <button onclick="start_clicked();" style="width: 150px; height: 50px; margin: 10px"><font size="5">Start</font></button>
+        <button onclick="start_clicked();" style="width: 300px; height: 50px; margin: 10px"><font size="5">Start local video</font></button><br>
 
-        <video id="local_video" controls style="border: 1px solid gray; width: 100%; float: left;"></video>
+        <video id="local_video" controls style="display: none;"></video>
 
 		<!-- Babylon.js のレンダリング内容を表示するための Canvas タグ-->
-		<canvas id="renderCanvas" style="border: 3px solid gray; width: 100%; float: left; touch-action: none;"></canvas>
+		<canvas id="renderCanvas" style="border: 3px solid gray; width: 90%; touch-action: none; margin: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0;"></canvas>
         <script type="text/javascript">
         	// canvas DOM 要素を取得する
 			const canvas = document.getElementById('renderCanvas');
@@ -151,7 +151,7 @@
 
             function start_clicked() {
                 navigator.mediaDevices
-                .getUserMedia({ audio: true, video: true })
+                .getUserMedia({ audio: false, video: true })
                 .then((stream) => {
                     localStream = stream;
                     document.getElementById('local_video').srcObject = stream;
